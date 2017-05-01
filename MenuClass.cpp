@@ -133,17 +133,46 @@ string MenuClass::getFilename()
 void MenuClass::inputMenu(char &action)
 {
     string input;
+    string num;
+    string word;
     long nom = 0;
     
     cout << endl << "Type H for (H)elp" << endl;
     
-    cin >> input;
+    cin >> ws;
+    getline(cin, input);
     
-    if(isalpha(input[0]))
-        action = toupper(input[0]);
+    char *newInput = new char[input.length()];
+    strcpy(newInput, input.c_str());
     
-    if(action == 'C' || action == 'M' || action == 'T' || action == 'R' || action == 'D' || action == 'I')
-        cin >> nom;
+    if(isalpha(newInput[0]))
+        action = toupper(newInput[0]);
+    
+    for(int i = 1; i < input.length(); i++)
+    {
+        if(ispunct(newInput[i]))
+            num += newInput[i];
+        if(isdigit(newInput[i]))
+            num += newInput[i];
+        if(isspace(newInput[i]))
+        {
+            if(isalpha(newInput[i+1]))
+            {
+                int index = i+1;
+                
+                while(!isspace(newInput[index]) && index < input.length())
+                {
+                    word += newInput[index];
+                    index++;
+                }
+            }
+        }
+        
+    }
+    
+    cout << word << endl;
+    
+    nom = atoi(num.c_str());
     
     ClearScreen();
     
@@ -153,11 +182,11 @@ void MenuClass::inputMenu(char &action)
     {
         case 'N':
         case 'O':
-            file(action);
+            file(action, word);
             break;
             
         case 'S':
-            sub();
+            sub(word);
             break;
             
         case 'C':
@@ -165,7 +194,7 @@ void MenuClass::inputMenu(char &action)
             break;
             
         case 'L':
-            locate();
+            locate(word);
             break;
             
         case 'D':
@@ -240,8 +269,8 @@ void MenuClass::menu()
 /*************************
         SUBSTITUTE
  ************************/
-void MenuClass::sub() {
-    string oldString;
+void MenuClass::sub(string str) {
+    string oldString = str;
     string newString;
     string word1;
     string line = content.at(currentLine);
@@ -250,8 +279,8 @@ void MenuClass::sub() {
     int j = 0;
     int index = 0;
     
-    cout << "Old word:" << endl;;
-    cin >> oldString;
+    /*cout << "Old word:" << endl;;
+    cin >> oldString;*/
     cout << "New word:" << endl;
     cin >> newString;
     
@@ -333,17 +362,17 @@ void MenuClass::copy(long num) {
 /*************************
           LOCATE
  ************************/
-void MenuClass::locate() {
+void MenuClass::locate(string str) {
     
-    string wordSearch;
+    string wordSearch = str;
     string word1;
     long indexLine = 0;
     long cur = currentLine;
     int indexWord = 0;
     
-    cout << "Find: ";
+    /*cout << "Find: ";
     cin.ignore();
-    getline(cin, wordSearch);
+    getline(cin, wordSearch);*/
     
     
     do
@@ -500,14 +529,14 @@ void MenuClass::replace(long num) {
 /*************************
           FILE
  ************************/
-void MenuClass::file(char ch)
+void MenuClass::file(char ch, string str)
 {
     fstream newFile;
-    string fileName, line;
+    string fileName = str, line;
     
-    cout << "File name: ";
+    /*cout << "File name: ";
     cin >> ws;
-    getline(cin, fileName);
+    getline(cin, fileName);*/
     
     fileName = fileName + ".txt";
     
