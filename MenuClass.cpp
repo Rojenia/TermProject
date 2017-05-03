@@ -265,7 +265,6 @@ void MenuClass::menu()
  ************************/
 void MenuClass::sub() {
     string oldString;
-    string oldString2;
     string newString;
     string line = content.at(currentLine);
     string lineLow;
@@ -306,11 +305,11 @@ void MenuClass::sub() {
         
         if(isalpha(oldString[i]))
         {
-            oldString2 += tolower(oldString[i]);
+            oldString[i] = tolower(oldString[i]);
         }
         else
         {
-            oldString2 += oldString[i];
+            oldString += oldString[i];
         }
     }
     
@@ -320,8 +319,6 @@ void MenuClass::sub() {
         string subLow;
         
         iss >> sub;
-        
-        
         
         for(int i = 0; i < static_cast<int>(sub.size()); i++)
         {
@@ -339,15 +336,13 @@ void MenuClass::sub() {
         index++;
         length = oldString.length();
         
-        size_t foundSub = sub.find(oldString);
-        size_t foundSub2 = subLow.find(oldString2);
+        size_t foundSub = subLow.find(oldString);
         
-        if(foundSub != string::npos || foundSub2 != string::npos)
+        if(foundSub != string::npos)
         {
             size_t found = line.find(sub);
-            size_t found2 = lineLow.find(subLow);
             
-            if(found != string::npos || found2 != string::npos)
+            if(found != string::npos)
             {
                 do
                 {
