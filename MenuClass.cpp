@@ -6,6 +6,8 @@
 
 #include "MenuClass.hpp"
 #include <iostream>
+#include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -132,9 +134,8 @@ string MenuClass::getFilename()
  ************************/
 void MenuClass::inputMenu(char &action)
 {
-    string input;
-    string num;
-    string word;
+    string input = "";
+    string num = "";
     long nom = 0;
     
     cout << endl << "Type H for (H)elp" << endl;
@@ -150,43 +151,36 @@ void MenuClass::inputMenu(char &action)
     
     for(int i = 1; i < input.length(); i++)
     {
-        if(ispunct(newInput[i]))
-            num += newInput[i];
-        if(isdigit(newInput[i]))
-            num += newInput[i];
-        if(isspace(newInput[i]))
+        if(ispunct(newInput[i]) || isdigit(newInput[i]))
         {
-            if(isalpha(newInput[i+1]))
+            if(newInput[i] == '-')
             {
-                int index = i+1;
-                
-                while(!isspace(newInput[index]) && index < input.length())
-                {
-                    word += newInput[index];
-                    index++;
-                }
+                num += newInput[i];
+            }
+            else
+            {
+                num += newInput[i];
             }
         }
         
     }
     
-    cout << word << endl;
-    
     nom = atoi(num.c_str());
     
     ClearScreen();
     
+    cout << nom << endl;
     cout <<"----------" << name << "----------" << endl;
     
     switch(action)
     {
         case 'N':
         case 'O':
-            file(action, word);
+            file(action);
             break;
             
         case 'S':
-            sub(word);
+            sub();
             break;
             
         case 'C':
@@ -194,7 +188,7 @@ void MenuClass::inputMenu(char &action)
             break;
             
         case 'L':
-            locate(word);
+            locate();
             break;
             
         case 'D':
@@ -269,24 +263,28 @@ void MenuClass::menu()
 /*************************
         SUBSTITUTE
  ************************/
-void MenuClass::sub(string str) {
-    string oldString = str;
+void MenuClass::sub() {
+    string oldString;
+    string oldString2;
     string newString;
-    string word1;
     string line = content.at(currentLine);
-    vector<char> newline (line.begin(), line.end());
+    string lineLow;
+    string ans;
+    long length = 0;
+    long index = -1;
+    char input;
     
-    int j = 0;
-    int index = 0;
+    istringstream iss(line);
+    vector<char> newline(line.begin(), line.end());
     
-    /*cout << "Old word:" << endl;;
-    cin >> oldString;*/
+    cout << "Old word:" << endl;
+    cin >> oldString;
+    
     cout << "New word:" << endl;
     cin >> newString;
     
-    
-    char *oldWord = new char[oldString.length() + 1];
-    char *newWord = new char[newString.length() + 1];
+    char *oldWord = new char[oldString.length()];
+    char *newWord = new char[newString.length()];
     
     strcpy(oldWord, oldString.c_str());
     strcpy(newWord, newString.c_str());
@@ -295,46 +293,92 @@ void MenuClass::sub(string str) {
     {
         if(isalpha(newline.at(i)))
         {
-            if(oldWord[j] == newline.at(i))
-            {
-                for(int k = 0; k < oldString.length(); k++)
-                {
-                    if((i+k) < newline.size())
-                        word1 += newline.at(i+k);
-                    index = i+k+1;
-                }
-            }
-            j++;
+            lineLow += tolower(newline.at(i));
         }
         else
-            j = 0;
-        
-        
-        if(word1 == oldString)
         {
-            newline.erase(newline.begin()+i, newline.begin()+index);
-            newline.insert(newline.begin()+i, newWord, newWord+(sizeof(newWord)));
+            lineLow += newline.at(i);
         }
-        word1.clear();
-        
     }
+    
+    for(int i = 0; i < oldString.size(); i++)
+    {
+        
+        if(isalpha(oldString[i]))
+        {
+            oldString2 += tolower(oldString[i]);
+        }
+        else
+        {
+            oldString2 += oldString[i];
+        }
+    }
+    
+    do
+    {
+        string sub;
+        string subLow;
+        
+        iss >> sub;
+        
+        
+        
+        for(int i = 0; i < static_cast<int>(sub.size()); i++)
+        {
+            if(isalpha(sub[i]))
+            {
+                subLow += tolower(sub[i]);
+            }
+            else
+            {
+                subLow += sub[i];
+            }
+        }
+        
+        index += static_cast<long>(sub.length());
+        index++;
+        length = oldString.length();
+        
+        size_t foundSub = sub.find(oldString);
+        size_t foundSub2 = subLow.find(oldString2);
+        
+        if(foundSub != string::npos || foundSub2 != string::npos)
+        {
+            size_t found = line.find(sub);
+            size_t found2 = lineLow.find(subLow);
+            
+            if(found != string::npos || found2 != string::npos)
+            {
+                do
+                {
+                    
+                    cout << "Replace? Yes or No?\n";
+                    cout << sub << endl;
+                    cin >> ans;
+                    input = toupper(ans[0]);
+                    ClearScreen();
+                
+                }while(!(input == 'Y' || input == 'N'));
+            
+                if(input == 'Y')
+                {
+                    index = (index - static_cast<long>(sub.length()));
+                    length += index;
+                    
+                    newline.erase(newline.begin()+index, newline.begin()+length);
+                    newline.insert(newline.begin()+index, newWord, newWord+(sizeof(newWord)));
+                }
+            
+            }
+        }
+    }while (iss);
     
     string sentence(newline.begin(), newline.end());
     
-    ClearScreen();
+    content[currentLine] = sentence;
     
-    if(!(lineBool(sentence, line)))
-    {
-        content[currentLine] = sentence;
-        cout << currentLine + 1 << " - " << sentence << endl;
+    cout << currentLine + 1 << " - "<< content.at(currentLine) << endl;
     }
-    else
-    {
-        cout << "The word: " << oldString << endl;
-        cout <<"Does not appear in the current line." << endl;
-        cout << currentLine + 1 << " - " << line << endl;
-    }
-}
 
 /*************************
           COPY
@@ -362,17 +406,17 @@ void MenuClass::copy(long num) {
 /*************************
           LOCATE
  ************************/
-void MenuClass::locate(string str) {
+void MenuClass::locate() {
     
-    string wordSearch = str;
+    string wordSearch;
     string word1;
     long indexLine = 0;
     long cur = currentLine;
     int indexWord = 0;
     
-    /*cout << "Find: ";
+    cout << "Find: ";
     cin.ignore();
-    getline(cin, wordSearch);*/
+    getline(cin, wordSearch);
     
     
     do
@@ -529,14 +573,15 @@ void MenuClass::replace(long num) {
 /*************************
           FILE
  ************************/
-void MenuClass::file(char ch, string str)
+void MenuClass::file(char ch)
 {
     fstream newFile;
-    string fileName = str, line;
+    string fileName;
+    string line;
     
-    /*cout << "File name: ";
+    cout << "File name: ";
     cin >> ws;
-    getline(cin, fileName);*/
+    getline(cin, fileName);
     
     fileName = fileName + ".txt";
     
@@ -615,5 +660,3 @@ void MenuClass::save()
         cout << "Cannot create file" << endl;
     outFile.close();
 }
-
-

@@ -33,16 +33,16 @@ public:
     string getFilename();
     void menu();
     void inputMenu(char &);
-    void sub(string);
+    void sub();
     void copy(long);
-    void locate(string);
+    void locate();
     void remove(long);
     void move(long);
     void type(long);
     void paste();
     void insert(long);
     void replace(long);
-    void file(char, string);
+    void file(char);
     void save();
     void ClearScreen();
     
