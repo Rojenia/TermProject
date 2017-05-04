@@ -169,7 +169,6 @@ void MenuClass::inputMenu(char &action)
     
     ClearScreen();
     
-    cout << nom << endl;
     cout <<"----------" << name << "----------" << endl;
     
     switch(action)
@@ -282,10 +281,8 @@ void MenuClass::sub() {
     cout << "New word:" << endl;
     cin >> newString;
     
-    char *oldWord = new char[oldString.length()];
     char *newWord = new char[newString.length()];
     
-    strcpy(oldWord, oldString.c_str());
     strcpy(newWord, newString.c_str());
     
     for(int i = 0; i < newline.size(); i++)
@@ -368,6 +365,8 @@ void MenuClass::sub() {
         }
     }while (iss);
     
+    
+    
     string sentence(newline.begin(), newline.end());
     
     content[currentLine] = sentence;
@@ -403,65 +402,122 @@ void MenuClass::copy(long num) {
  ************************/
 void MenuClass::locate() {
     
-    string wordSearch;
-    string word1;
-    long indexLine = 0;
     long cur = currentLine;
-    int indexWord = 0;
+    string wordSearch;
+    char input = ' ';
+    int no = 0;
     
-    cout << "Find: ";
-    cin.ignore();
-    getline(cin, wordSearch);
-    
-    
-    do
-    {
-        indexLine++;
-        cur++;
-        
-        string line = content.at(cur);
-        vector<char> newline (line.begin(), line.end());
-    
-        char *oldWord = new char[wordSearch.length() + 1];
-    
-        strcpy(oldWord, wordSearch.c_str());
-        
-        for(int i = 0; i < newline.size(); i++)
-        {
-            indexWord = 0;
-            word1.clear();
-            if(isalpha(newline.at(i)))
-            {
-                if(oldWord[indexWord] == newline.at(i))
-                {
-                    for(int k = 0; k < wordSearch.length(); k++)
-                    {
-                        if((i+k) < newline.size())
-                        {
-                            word1 += newline.at(i+k);
-                        }
-                    }
-                    if(word1 == wordSearch){
-                        currentLine += indexLine;
-                        break;
-                    }
-                }
-                indexWord++;
-            }
-            
-        }
-        if(indexLine >= size)
-        {
-            indexLine--;
-        }
-
-        
-    } while(word1 != wordSearch && indexLine != (size-1));
+    cout << "Find:" << endl;
+    cin >> wordSearch;
     
     ClearScreen();
     
-    cout << currentLine + 1 << " - " << content.at(currentLine) << endl;;
-
+    for(long i = currentLine; i < (size - 2); i++)
+    {
+        string wordLow;
+        string line = content.at(cur);
+        string lineLow;
+        string ans;
+        long length = 0;
+        long index = -1;
+    
+        istringstream iss(line);
+        vector<char> newline(line.begin(), line.end());
+    
+        char *oldWord = new char[wordSearch.length()];
+    
+        strcpy(oldWord, wordSearch.c_str());
+    
+        for(int i = 0; i < newline.size(); i++)
+        {
+            if(isalpha(newline.at(i)))
+            {
+                lineLow += tolower(newline.at(i));
+            }
+            else
+            {
+                lineLow += newline.at(i);
+            }
+        }
+    
+        for(int i = 0; i < wordSearch.size(); i++)
+        {
+        
+            if(isalpha(wordSearch[i]))
+            {
+                wordSearch[i] = tolower(wordSearch[i]);
+            }
+            else
+            {
+                wordSearch[i] += wordSearch[i];
+            }
+        }
+    
+        do
+        {
+            string sub;
+            string subLow;
+        
+            iss >> sub;
+        
+            for(int i = 0; i < static_cast<int>(sub.size()); i++)
+            {
+                if(isalpha(sub[i]))
+                {
+                    subLow += tolower(sub[i]);
+                }
+                else
+                {
+                    subLow += sub[i];
+                }
+            }
+        
+            index += static_cast<long>(sub.length());
+            index++;
+            length = wordSearch.length();
+        
+            size_t foundSub = subLow.find(wordSearch);
+        
+            if(foundSub != string::npos)
+            {
+                size_t found = line.find(sub);
+            
+                if(found != string::npos)
+                {
+                    do
+                    {
+                        cout << "This line? Yes or No?" << endl;
+                        cout << currentLine + cur +1 << " - " << content.at(cur) << endl;
+                        cin >> ans;
+                        input = toupper(ans[0]);
+                        ClearScreen();
+                    
+                    }while(!(input == 'Y' || input == 'N'));
+                
+                    if(input == 'N' )
+                    {
+                        cur++;
+                        no++;
+                        outOfBounds(cur);
+                    }
+                    else
+                    {
+                        currentLine += cur;
+                        break;
+                    }
+                }
+            }
+            if(input == 'Y')
+                break;
+        }while (iss);
+        
+        if(input == 'Y')
+            break;
+        else
+            cur++;
+    }
+    cin.ignore();
+    cout << currentLine + 1 << " - "<< content.at(currentLine) << endl;
 }
 
 /*************************
@@ -527,12 +583,11 @@ void MenuClass::paste() {
  ************************/
 void MenuClass::insert(long num) {
     string sentence;
-    
-    cin.ignore();
     for(int i = 0; i < num; i++)
     {
         currentLine += 1;
         cout << currentLine + 1 << " - ";
+        cin.ignore();
         getline(cin, sentence);
         content.insert(content.begin()+currentLine, 1, sentence);
     }
